@@ -320,6 +320,68 @@ def load_index(filename, csv_filename):
         print("ERROR: csv contains invalid unsigned 64-bit key or value")
 
 
+def print_tree(file, block_id):
+    if block_id == 0:
+        return
+
+    node = read_node(file, block_id)
+
+    for i in range(len(node.keys)):
+        print_tree(file, node.children[i])
+        print(f"{node.keys[i]},{node.values[i]}")
+
+    print_tree(file, node.children[len(node.keys)])
+
+
+def print_index(filename):
+    if not os.path.exists(filename):
+        print("ERROR: index file does not exist")
+        return
+
+    try:
+        with open(filename, "rb") as file:
+            root_id, next_id = read_header(file)
+            print_tree(file, root_id)
+
+    except Exception:
+        print("ERROR: invalid index file")
+
+
+def extract_tree(file, block_id, output):
+    if block_id == 0:
+        return
+
+    node = read_node(file, block_id)
+
+    for i in range(len(node.keys)):
+        extract_tree(file, node.children[i], output)
+        output.write(f"{node.keys[i]},{node.values[i]}\n")
+
+    extract_tree(file, node.children[len(node.keys)], output)
+
+
+def extract_index(filename, output_filename):
+    if not os.path.exists(filename):
+        print("ERROR: index file does not exist")
+        return
+
+    if os.path.exists(output_filename):
+        print("ERROR: output file already exists")
+        return
+
+    try:
+        with open(filename, "rb") as file:
+            root_id, next_id = read_header(file)
+
+            with open(output_filename, "w") as output:
+                extract_tree(file, root_id, output)
+
+        print("Extracted")
+
+    except Exception:
+        print("ERROR: invalid index file")
+
+
 def main():
     if len(sys.argv) < 2:
         print("ERROR: missing command")
@@ -358,6 +420,20 @@ def main():
                 return
 
             load_index(sys.argv[2], sys.argv[3])
+
+        elif command == "print":
+            if len(sys.argv) != 3:
+                print("ERROR: print requires an index filename")
+                return
+
+            print_index(sys.argv[2])
+
+        elif command == "extract":
+            if len(sys.argv) != 4:
+                print("ERROR: extract requires an index filename and output filename")
+                return
+
+            extract_index(sys.argv[2], sys.argv[3])
 
         else:
             print("ERROR: unknown command")

@@ -79,3 +79,13 @@ In this session I will implement the load command. I think it should be pretty s
 ### Session Reflection
 
 This session was not that bad as I thought since I was able to reuse insert_index. To make sure that the code did not break, I added multiple checks. These checks incldued checking for missing files anc checking invalid csv lines. I also made sure that the csv file uses the same unsigned integer conversion as the command-line insert command.
+
+## 05-08-26 4:30 AM
+
+### Session 6
+
+In this session I am going to implement the print and extract commands. Once again, I don't expect this to be too difficult. My plan is to just use inorder traversal of the B-Tree. The print command expects one index filename and prints all key/value pairs in sorted order while the extract comand expects an idnex filename and output csv filename.
+
+### Session Reflection
+
+As I planned, I used inorder traversal of the B-Tree for both of the commands. Print writes to the standard output while extract writes to a csv file. I made sure to check that extract does not overwrite an existing output file as instructed. 
