@@ -288,6 +288,38 @@ def insert_index(filename, key, value):
         print("ERROR: invalid index file")
 
 
+def load_index(filename, csv_filename):
+    if not os.path.exists(filename):
+        print("ERROR: index file does not exist")
+        return
+
+    if not os.path.exists(csv_filename):
+        print("ERROR: csv file does not exist")
+        return
+
+    try:
+        with open(csv_filename, "r") as csv_file:
+            for line in csv_file:
+                line = line.strip()
+
+                if line == "":
+                    continue
+
+                parts = line.split(",")
+
+                if len(parts) != 2:
+                    print("ERROR: invalid csv line")
+                    return
+
+                key = parse_u64(parts[0].strip())
+                value = parse_u64(parts[1].strip())
+
+                insert_index(filename, key, value)
+
+    except ValueError:
+        print("ERROR: csv contains invalid unsigned 64-bit key or value")
+
+
 def main():
     if len(sys.argv) < 2:
         print("ERROR: missing command")
@@ -319,6 +351,13 @@ def main():
             key = parse_u64(sys.argv[3])
             value = parse_u64(sys.argv[4])
             insert_index(sys.argv[2], key, value)
+
+        elif command == "load":
+            if len(sys.argv) != 4:
+                print("ERROR: load requires an index filename and csv filename")
+                return
+
+            load_index(sys.argv[2], sys.argv[3])
 
         else:
             print("ERROR: unknown command")

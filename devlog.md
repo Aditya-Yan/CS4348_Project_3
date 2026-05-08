@@ -69,3 +69,13 @@ This session is definitely hard as I expected. I am messing up small details whe
 ### Session Reflection
 
 This was definitely the hardest section to do as I expected because of the B-Tree splitting. This is because I had to handle multiple cases such as the empty tree case, normal leaf insertion, duplicate keys, splitting full children, and creating a new root when the old root is full. For example, as I mentioned before, I initially chose the incorrect median key when splitting a full node which was leading to issues. I also forgot to update the root id initially when the new root split which caused future searches to start from the old root and the tree ended up wrong. Finally, I forgot to check for duplicate keys intitially, even though it was in my plan. 
+
+## 05-08-26 4:23 AM
+
+### Session 5
+
+In this session I will implement the load command. I think it should be pretty simple as I can just reuse the insert function I wrote in the previous session. I just need to check the csv so the data in it does not cause any errors. This command expects an index filename and a csv filename.
+
+### Session Reflection
+
+This session was not that bad as I thought since I was able to reuse insert_index. To make sure that the code did not break, I added multiple checks. These checks incldued checking for missing files anc checking invalid csv lines. I also made sure that the csv file uses the same unsigned integer conversion as the command-line insert command.
