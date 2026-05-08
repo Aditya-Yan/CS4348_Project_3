@@ -34,3 +34,17 @@ In this session I want to add the B-Tree node structure. On top of this, I am go
 ### Session Reflection
 
 This section also was not too hard to implement, I just had to make sure that I followed the 512-byte block format. I had to make sure that each node stored 19 keys, 19 values, and 20 child pointers. One thing that I did forget to do initally was to pad the unused values with zeros. I realized that I had to do this so that each node would take up exactly one block.
+
+## 05-08-26 3:26 AM
+
+### Session 3
+
+In this session I want to implement the search command. As stated in the project instructions, the search commands expects an index filename and a key. I just have to remember to convert the key into an unsigned integer before searching.
+
+### Mid-Session Thought
+I am a little unsure about how I should convert to unsigned integers on whether or not I should use masks as the use of masks would make this project more complicated. I think I am leaning toward not using masks and instead just convert the input into its 8-byte unsigned big-endian representaion using to_bytes()
+
+### Session Reflection
+
+I got the search command working properly and tested it. Was not too bad either. One mistake I did make though was for my unsigned integer conversion, I only checked if the number is negative. I then changed this to make sure that the parser I created also didn't allow values over 2^64 -1. I did this by using pythons to_bytes() function and checked for errors. Also for this section, I am assuming by "converting" to unsigned integers, it is fine to just reject keys that are not in the range from 0 to 2^64 -1 because if we were to just convert using masks, then duplicate detection would become weird and searching would become confusing with huge positive numbers.
+

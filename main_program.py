@@ -108,6 +108,61 @@ def create_index(filename):
 
     print("Index file created")
 
+def parse_u64(value):
+    try:
+        number = int(value)
+
+        # Convert into unsigned 64-bit bytes.
+        unsigned_bytes = number.to_bytes(8, "big", signed=False)
+
+        # Convert back from unsigned bytes into Python integer.
+        return int.from_bytes(unsigned_bytes, "big", signed=False)
+
+    except OverflowError:
+        raise ValueError("number outside unsigned 64-bit range")
+
+    except ValueError:
+        raise ValueError("invalid unsigned 64-bit integer")
+
+
+def search_tree(file, block_id, key):
+    if block_id == 0:
+        return None
+
+    node = read_node(file, block_id)
+
+    i = 0
+    while i < len(node.keys) and key > node.keys[i]:
+        i += 1
+
+    if i < len(node.keys) and key == node.keys[i]:
+        return key, node.values[i]
+
+    if node.children[i] == 0:
+        return None
+
+    return search_tree(file, node.children[i], key)
+
+
+def search_index(filename, key):
+    if not os.path.exists(filename):
+        print("ERROR: index file does not exist")
+        return
+
+    try:
+        with open(filename, "rb") as file:
+            root_id, next_id = read_header(file)
+            result = search_tree(file, root_id, key)
+
+            if result is None:
+                print("ERROR: key not found")
+            else:
+                print(f"{result[0]},{result[1]}")
+
+    except Exception:
+        print("ERROR: invalid index file")
+
+
 
 def main():
     if len(sys.argv) < 2:
@@ -116,15 +171,28 @@ def main():
 
     command = sys.argv[1]
 
-    if command == "create":
-        if len(sys.argv) != 3:
-            print("ERROR: create requires an index filename")
-            return
+    try:
+        if command == "create":
+            if len(sys.argv) != 3:
+                print("ERROR: create requires an index filename")
+                return
 
-        create_index(sys.argv[2])
+            create_index(sys.argv[2])
 
-    else:
-        print("ERROR: unknown command")
+        elif command == "search":
+            if len(sys.argv) != 4:
+                print("ERROR: search requires an index filename and key")
+                return
+
+            key = parse_u64(sys.argv[3])
+            search_index(sys.argv[2], key)
+
+        else:
+            print("ERROR: unknown command")
+
+    except ValueError:
+        print("ERROR: key and value must be unsigned 64-bit integers")
+
 
 
 if __name__ == "__main__":
