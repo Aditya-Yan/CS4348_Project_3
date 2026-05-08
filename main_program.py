@@ -164,6 +164,130 @@ def search_index(filename, key):
 
 
 
+def insert_into_leaf(node, key, value):
+    i = len(node.keys) - 1
+
+    node.keys.append(0)
+    node.values.append(0)
+
+    while i >= 0 and key < node.keys[i]:
+        node.keys[i + 1] = node.keys[i]
+        node.values[i + 1] = node.values[i]
+        i -= 1
+
+    node.keys[i + 1] = key
+    node.values[i + 1] = value
+
+
+def split_child(file, parent, index, child, next_id):
+    new_child = Node(next_id, parent.block_id)
+
+    median_key = child.keys[T - 1]
+    median_value = child.values[T - 1]
+
+    new_child.keys = child.keys[T:]
+    new_child.values = child.values[T:]
+
+    child.keys = child.keys[:T - 1]
+    child.values = child.values[:T - 1]
+
+    if not child.is_leaf():
+        new_child.children = child.children[T:]
+        child.children = child.children[:T] + [0] * T
+
+        for child_id in new_child.children:
+            if child_id != 0:
+                temp = read_node(file, child_id)
+                temp.parent = new_child.block_id
+                write_node(file, temp)
+
+    parent.keys.insert(index, median_key)
+    parent.values.insert(index, median_value)
+    parent.children.insert(index + 1, new_child.block_id)
+    parent.children = parent.children[:MAX_CHILDREN]
+
+    write_node(file, child)
+    write_node(file, new_child)
+    write_node(file, parent)
+
+    return next_id + 1
+
+
+def insert_non_full(file, node, key, value, next_id):
+    i = len(node.keys) - 1
+
+    if node.is_leaf():
+        insert_into_leaf(node, key, value)
+        write_node(file, node)
+        return next_id
+
+    while i >= 0 and key < node.keys[i]:
+        i -= 1
+
+    i += 1
+    child = read_node(file, node.children[i])
+
+    if len(child.keys) == MAX_KEYS:
+        next_id = split_child(file, node, i, child, next_id)
+
+        node = read_node(file, node.block_id)
+
+        if key > node.keys[i]:
+            i += 1
+
+    child = read_node(file, node.children[i])
+    return insert_non_full(file, child, key, value, next_id)
+
+
+def insert_index(filename, key, value):
+    if not os.path.exists(filename):
+        print("ERROR: index file does not exist")
+        return
+
+    try:
+        with open(filename, "r+b") as file:
+            root_id, next_id = read_header(file)
+
+            existing = search_tree(file, root_id, key)
+            if existing is not None:
+                print("ERROR: duplicate key")
+                return
+
+            if root_id == 0:
+                root = Node(next_id)
+                insert_into_leaf(root, key, value)
+
+                write_node(file, root)
+                write_header(file, root.block_id, next_id + 1)
+
+                print("Inserted")
+                return
+
+            root = read_node(file, root_id)
+
+            if len(root.keys) == MAX_KEYS:
+                new_root = Node(next_id)
+                next_id += 1
+
+                new_root.children[0] = root.block_id
+                root.parent = new_root.block_id
+                write_node(file, root)
+
+                next_id = split_child(file, new_root, 0, root, next_id)
+                root_id = new_root.block_id
+
+                new_root = read_node(file, root_id)
+                next_id = insert_non_full(file, new_root, key, value, next_id)
+            else:
+                next_id = insert_non_full(file, root, key, value, next_id)
+
+            write_header(file, root_id, next_id)
+            print("Inserted")
+
+    except Exception:
+        print("ERROR: invalid index file")
+
+
 def main():
     if len(sys.argv) < 2:
         print("ERROR: missing command")
@@ -187,12 +311,20 @@ def main():
             key = parse_u64(sys.argv[3])
             search_index(sys.argv[2], key)
 
+        elif command == "insert":
+            if len(sys.argv) != 5:
+                print("ERROR: insert requires an index filename, key, and value")
+                return
+
+            key = parse_u64(sys.argv[3])
+            value = parse_u64(sys.argv[4])
+            insert_index(sys.argv[2], key, value)
+
         else:
             print("ERROR: unknown command")
 
     except ValueError:
         print("ERROR: key and value must be unsigned 64-bit integers")
-
 
 
 if __name__ == "__main__":

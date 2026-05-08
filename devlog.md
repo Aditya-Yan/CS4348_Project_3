@@ -48,3 +48,24 @@ I am a little unsure about how I should convert to unsigned integers on whether 
 
 I got the search command working properly and tested it. Was not too bad either. One mistake I did make though was for my unsigned integer conversion, I only checked if the number is negative. I then changed this to make sure that the parser I created also didn't allow values over 2^64 -1. I did this by using pythons to_bytes() function and checked for errors. Also for this section, I am assuming by "converting" to unsigned integers, it is fine to just reject keys that are not in the range from 0 to 2^64 -1 because if we were to just convert using masks, then duplicate detection would become weird and searching would become confusing with huge positive numbers.
 
+## 05-08-26 3:47 AM
+
+### Interjection
+
+I think I will change the plan I had at the beginning of the project a little bit. In this next section, I will just implement the entire insert logic. Then I will split up the rest between the last two sessions. The new plan is as follows:
+
+4. Implement insert command
+5. Implement load command and csv argument logic
+6. Implement print and extract commands with their argument logic
+
+### Session 4
+
+In this session I am going to implement the insert command with and without splitting. I am expecting this session to be the hardest one as I have to do the B-Tree splitting properly. As stated in the project description, this command expects an index filename, key, and value. Both the key and value are parsed using the unsigned 64-bit parser. In order to efficiently do this section, I will list the different cases I will have to handle in implementing this command. The different cases will the empty tree case, normal leaf insertion, duplicate keys, splitting full children, and creating a new root when the old root is full.
+
+### Mid-Session Thought
+
+This session is definitely hard as I expected. I am messing up small details when implementing these cases which is messing up the entire tree. For example, I chose the wrong median intially when splitting. I also have to be careful with child pointers and parent pointers during splitting because I accidently caused the file structure to become inconsistent if only one is updated correctly.
+
+### Session Reflection
+
+This was definitely the hardest section to do as I expected because of the B-Tree splitting. This is because I had to handle multiple cases such as the empty tree case, normal leaf insertion, duplicate keys, splitting full children, and creating a new root when the old root is full. For example, as I mentioned before, I initially chose the incorrect median key when splitting a full node which was leading to issues. I also forgot to update the root id initially when the new root split which caused future searches to start from the old root and the tree ended up wrong. Finally, I forgot to check for duplicate keys intitially, even though it was in my plan. 
