@@ -89,3 +89,33 @@ In this session I am going to implement the print and extract commands. Once aga
 ### Session Reflection
 
 As I planned, I used inorder traversal of the B-Tree for both of the commands. Print writes to the standard output while extract writes to a csv file. I made sure to check that extract does not overwrite an existing output file as instructed. 
+
+## 05-08-26 4:41 AM
+
+### Session 7 
+
+For the final session, I tested the full program from the command line.
+
+### Tests
+
+python project3.py create test.idx  
+python project3.py insert test.idx 15 100  
+python project3.py insert test.idx 20 200  
+python project3.py search test.idx 15  
+python project3.py print test.idx  
+python project3.py extract test.idx output.csv  
+
+I also tested error cases:
+
+- Creating a file that already exists
+- Searching for a missing key
+- Inserting a duplicate key
+- Loading a missing csv file
+- Extracting to an output file that already exists
+- Running commands with missing arguments
+- Entering a negative key or value
+- Entering a key or value larger than 2^64 - 1
+
+### Session Reflection
+
+Everything is working well. I will do a final check-up tomorrow before turning in.
