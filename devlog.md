@@ -24,3 +24,13 @@ When doing this, I need to make sure that the block ids are correct. The index f
 
 ### Session Reflection
 This section was pretty straightforward. The only thing I had to actually be careful of was to make sure that every number was written as a 8-byte big-endian integer. I also made sure to include the feature where create will fail if the file exists. I am also adding the logic for accepting command line arguments as I create these commands so it is easier for me to test. Overall, pretty easy section to implement. 
+
+## 05-08-26 3:04 AM
+
+### Session 2
+
+In this session I want to add the B-Tree node structure. On top of this, I am going to add helper functions for reading and writing headers and nodes so I do not have to repeat code.
+
+### Session Reflection
+
+This section also was not too hard to implement, I just had to make sure that I followed the 512-byte block format. I had to make sure that each node stored 19 keys, 19 values, and 20 child pointers. One thing that I did forget to do initally was to pad the unused values with zeros. I realized that I had to do this so that each node would take up exactly one block.
